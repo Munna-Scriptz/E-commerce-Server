@@ -1,6 +1,8 @@
 require('dotenv').config({ quiet: true })
 const express = require("express")
 const cors = require("cors")
+const dns = require("dns")
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 const dbConfig = require("./dbConfig")
 const router = require("./routes")
 const cookieParser = require('cookie-parser')
@@ -10,7 +12,7 @@ const app = express()
 // ------------------- Middlewares 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(cookieParser()) 
+app.use(cookieParser())
 app.use(cors())
 // ------------------- Route 
 app.use(router)
@@ -19,6 +21,6 @@ dbConfig()
 cloudConfig()
 
 // ----------------------- Server Listener 
-app.listen(8000 , ()=>{
+app.listen(8000, () => {
     console.log('Server Is Running')
 })

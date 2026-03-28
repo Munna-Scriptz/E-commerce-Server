@@ -66,7 +66,7 @@ const orderSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    city: {
+    division: {
         type: String,
         required: true
     },
@@ -76,7 +76,7 @@ const orderSchema = mongoose.Schema({
         default: false,
     },
     deliveryCharge: {
-        type: Numebr,
+        type: Number,
         default: 0
     },
     status: {
