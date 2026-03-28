@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const cartItem = mongoose.schema({
+const cartItem = mongoose.Schema({
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
@@ -37,7 +37,7 @@ const cartSchema = new mongoose.Schema({
         unique: true,
     },
     items: [
-        FcartItem
+        cartItem
     ],
     totalItems: {
         type: Number,
