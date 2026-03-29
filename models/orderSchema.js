@@ -58,6 +58,7 @@ const orderSchema = mongoose.Schema({
     items: [
         orderItem
     ],
+    paymentMethod: paymentSchema,
     totalPrice: {
         type: Number,
         required: true
@@ -82,7 +83,7 @@ const orderSchema = mongoose.Schema({
     status: {
         type: String,
         enum: ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"],
-        default: true
+        default: "pending"
     },
     orderId: {
         type: String,

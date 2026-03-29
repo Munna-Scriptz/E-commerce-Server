@@ -20,7 +20,7 @@ app.use(router)
 dbConfig()
 cloudConfig()
 
-// ----------------------- Server Listener 
+// ------------------- Server Listener 
 app.listen(8000, () => {
     console.log('Server Is Running')
 })
