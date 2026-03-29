@@ -46,10 +46,9 @@ const checkout = async (req, res) => {
         })
 
         order.save()
-
-
-        // ---------- Success 
-        resHandler.success(res, 200, "Order placed successfully")
+ 
+        // ---------- Cod Success 
+        if (paymentMethod == "cod") return resHandler.success(res, 200, "Order placed successfully")
     } catch (error) {
         console.log(error)
         resHandler.error(res, 500, "Internal server error")
