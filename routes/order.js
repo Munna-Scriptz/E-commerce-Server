@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const { checkout } = require("../controllers/orderController")
+const authMiddleware = require('../middleware/authMiddleware')
 
-router.post("/", checkout)
+router.post("/", authMiddleware, checkout)
 
 module.exports = router

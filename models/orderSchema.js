@@ -32,14 +32,14 @@ const orderItem = mongoose.Schema({
 const paymentSchema = mongoose.Schema({
     method: {
         type: String,
-        emun: ["bkash", "nagad", "stripe", "SSLCommerz", "cod"]
+        enum: ["bkash", "nagad", "stripe", "SSLCommerz", "cod"]
     },
     paymentId: {
         type: String,
     },
     status: {
         type: String,
-        emun: ["pending", "paid", "cancelled"],
+        enum: ["pending", "paid", "cancelled"],
         default: "pending"
     },
     paidAt: {
@@ -58,7 +58,7 @@ const orderSchema = mongoose.Schema({
     items: [
         orderItem
     ],
-    paymentMethod: paymentSchema,
+    payment: paymentSchema,
     totalPrice: {
         type: Number,
         required: true
