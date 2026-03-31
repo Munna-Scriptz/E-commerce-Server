@@ -2,6 +2,7 @@ const cartSchema = require("../models/cartSchema");
 const orderSchema = require("../models/orderSchema");
 const resHandler = require("../utils/resHandler")
 const { ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SEC_KEY);
 
 const checkout = async (req, res) => {
     try {
@@ -46,9 +47,35 @@ const checkout = async (req, res) => {
         })
 
         order.save()
- 
+
         // ---------- Cod Success 
-        if (paymentMethod == "cod") return resHandler.success(res, 200, "Order placed successfully")
+        if (paymentMethod === "cod") return resHandler.success(res, 200, "Order placed successfully")
+
+        // ---------- Handle payment 
+        if (paymentMethod === "stripe") {
+            const session = await stripe.checkout.sessions.create({
+                mode: 'payment',
+                line_items: [
+                    {
+                        price_data: {
+                            currency: 'bdt',
+                            product_data: {
+                                name: 'T-Shirt',
+                                description: `Blue T-Shirt with chest print`,
+                            },
+                            unit_amount: 1000 * 100,
+                        },
+                        quantity: 1,
+                    }
+                ],
+                customer_email: `${req.user.email}`,
+                success_url: `https://rexifyshop.vercel.app/checkout/complete`,
+                cancel_url: `https://rexifyshop.vercel.app/checkout/error`,
+            });
+            console.log(session)
+            res.redirect(303, session.url);
+        }
+
     } catch (error) {
         console.log(error)
         resHandler.error(res, 500, "Internal server error")
