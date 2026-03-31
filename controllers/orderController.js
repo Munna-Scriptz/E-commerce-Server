@@ -17,10 +17,10 @@ const checkout = async (req, res) => {
         if (!division) return resHandler.error(res, 400, "Division is required")
 
         // ----- Find from db
-        const existingCart = await cartSchema.findOne({ _id: cartId })
+        const existingCart = await cartSchema.findOne({ _id: cartId }).populate("items.product")
         if (!existingCart) return resHandler.error(res, 404, "Product doesn't exist")
         if (!user) return resHandler.error(res, 404, "user not found")
-
+            console.log(existingCart)
         // ----- Price and charges
         const insideDhaka = division.toLowerCase() == "dhaka"
         const deliveryCharge = insideDhaka ? 80 : 120
@@ -51,7 +51,7 @@ const checkout = async (req, res) => {
         // ---------- Cod Success 
         if (paymentMethod === "cod") return resHandler.success(res, 200, "Order placed successfully")
 
-        // ---------- Handle payment 
+        // ---------- Handle stripe payment 
         if (paymentMethod === "stripe") {
             const session = await stripe.checkout.sessions.create({
                 mode: 'payment',
@@ -72,8 +72,10 @@ const checkout = async (req, res) => {
                 success_url: `https://rexifyshop.vercel.app/checkout/complete`,
                 cancel_url: `https://rexifyshop.vercel.app/checkout/error`,
             });
-            console.log(session)
-            res.redirect(303, session.url);
+            // res.redirect(303, session.url);
+
+            // ------------- Success 
+            resHandler.success(res, 200, "Please complete the checkout", session.url)
         }
 
     } catch (error) {
