@@ -15,6 +15,10 @@ router.use('/review', review)
 router.use('/cart', cart)
 router.use('/checkout', order)
 
+router.get('/', (req, res)=>{
+    res.send("Hello world")
+})
+
 
 // --------- Not Found 
 router.use((req, res) => { res.status(404).send('404 Page Not Found') })

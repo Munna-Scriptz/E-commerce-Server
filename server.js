@@ -6,10 +6,13 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 const dbConfig = require("./dbConfig")
 const router = require("./routes")
 const cookieParser = require('cookie-parser')
-const cloudConfig = require('./services/cloudConfig')
+const cloudConfig = require('./services/cloudConfig');
+const { webhook } = require('./controllers/orderController');
 const app = express()
 
 // ------------------- Middlewares 
+app.post('/webhook', express.raw({type: 'application/json'}), webhook);
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())

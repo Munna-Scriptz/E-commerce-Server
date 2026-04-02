@@ -3,6 +3,7 @@ const orderSchema = require("../models/orderSchema");
 const resHandler = require("../utils/resHandler")
 const { ObjectId } = require('mongodb');
 const stripe = require('stripe')(process.env.STRIPE_SEC_KEY);
+const endpointSecret = process.env.STRIPE_SIGNING_SEC;
 
 const checkout = async (req, res) => {
     try {
@@ -62,12 +63,15 @@ const checkout = async (req, res) => {
                             description: item.product.description,
                             images: [item.product.thumbnail],
                         },
-                        
+
                         unit_amount: item.price * 100,
                     },
                     quantity: item.quantity,
                 })),
                 customer_email: `${req.user.email}`,
+                metadata: {
+                    orderId: `${existingCart._id}`
+                },
                 success_url: `https://rexifyshop.vercel.app/checkout/complete`,
                 cancel_url: `https://rexifyshop.vercel.app/checkout/error`,
             });
@@ -82,5 +86,30 @@ const checkout = async (req, res) => {
     }
 }
 
+const webhook = async (req, res) => {
+    const sig = req.headers['stripe-signature'];
 
-module.exports = { checkout }
+    let event;
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err) {
+        res.status(400).send(`Webhook Error: ${err.message}`);
+        return;
+    }
+
+    // Handle the event
+
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object
+
+        // Saving the payment details in the database
+        const payment = await orderSchema.findOne(session.metadata.orderId, { "payment.status": "paid" }, { new: true })
+        console.log(payment)
+    }
+
+    // Return a 200 response to acknowledge receipt of the event
+    res.send();
+}
+
+
+module.exports = { checkout, webhook }
