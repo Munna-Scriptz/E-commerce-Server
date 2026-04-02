@@ -97,25 +97,33 @@ const webhook = async (req, res) => {
         return;
     }
 
-    // --------- Receipt url 
-    let receiptUrl;
-    if (event.type === 'charge.updated') {
-        receiptUrl = event.data.previous_attributes.receipt_url
-    }
-    // Handle the event
+
+    // -------- payment information
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object
 
-        // Saving the payment details in the database
+        // ------- Save to DB
         await orderSchema.findByIdAndUpdate(session.metadata.orderId, {
             "payment.paymentId": session.id,
             "payment.status": "paid",
             "payment.fullname": session.customer_details.name,
             "payment.email": session.customer_details.email,
-            "payment.receipt": receiptUrl,
             "payment.paidAmount": session.amount,
             "payment.paidAt": Date.now()
         })
+    }
+
+    // ------------ Payment receipt
+    if (event.type === 'charge.updated') {
+        const session = event.data.object;
+        
+       // ------- Save to DB
+        await orderSchema.findOneAndUpdate(
+            session.metadata.orderId,
+            {
+                "payment.receipt": session.receipt_url
+            }
+        );
     }
 
     // ------------ Success
