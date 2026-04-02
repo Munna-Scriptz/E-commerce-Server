@@ -37,15 +37,24 @@ const paymentSchema = mongoose.Schema({
     paymentId: {
         type: String,
     },
+    fullname: {
+        type: String
+    },
+    email: {
+        type: String
+    },
     status: {
         type: String,
         enum: ["pending", "paid", "cancelled"],
         default: "pending"
     },
+    receipt: {
+        type: String
+    },
     paidAt: {
         type: Date
-    }
-})
+    },
+}, { _id: false })
 
 
 const orderSchema = mongoose.Schema({

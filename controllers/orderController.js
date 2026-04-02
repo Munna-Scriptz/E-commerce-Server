@@ -70,7 +70,7 @@ const checkout = async (req, res) => {
                 })),
                 customer_email: `${req.user.email}`,
                 metadata: {
-                    orderId: `${existingCart._id}`
+                    orderId: `${order._id}`
                 },
                 success_url: `https://rexifyshop.vercel.app/checkout/complete`,
                 cancel_url: `https://rexifyshop.vercel.app/checkout/error`,
@@ -97,17 +97,21 @@ const webhook = async (req, res) => {
         return;
     }
 
-    // Handle the event
 
+    // Handle the event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object
 
         // Saving the payment details in the database
-        const payment = await orderSchema.findOne(session.metadata.orderId, { "payment.status": "paid" }, { new: true })
-        console.log(payment)
+        await orderSchema.findByIdAndUpdate(session.metadata.orderId, {
+            "payment.paymentId": session.id,
+            "payment.status": "paid",
+            "payment.receipt": "",
+            "payment.paidAt": Date.now()
+        })
     }
 
-    // Return a 200 response to acknowledge receipt of the event
+    // ------------ Success
     res.send();
 }
 
