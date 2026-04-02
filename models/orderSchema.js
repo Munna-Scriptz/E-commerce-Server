@@ -34,6 +34,10 @@ const paymentSchema = mongoose.Schema({
         type: String,
         enum: ["bkash", "nagad", "stripe", "SSLCommerz", "cod"]
     },
+    currency: {
+        type: String,
+        default: "bdt"
+    },
     paymentId: {
         type: String,
     },
@@ -75,8 +79,10 @@ const orderSchema = mongoose.Schema({
         required: true
     },
     shippingAddress: {
-        type: String,
-        required: true
+        address: String,
+        city: String,
+        postalCode: String,
+        phone: String,
     },
     division: {
         type: String,

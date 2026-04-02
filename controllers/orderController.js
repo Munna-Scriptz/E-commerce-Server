@@ -101,11 +101,12 @@ const webhook = async (req, res) => {
     // -------- payment information
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object
-
+        
         // ------- Save to DB
         await orderSchema.findByIdAndUpdate(session.metadata.orderId, {
             "payment.paymentId": session.id,
             "payment.status": "paid",
+            "payment.currency": session.currency,
             "payment.fullname": session.customer_details.name,
             "payment.email": session.customer_details.email,
             "payment.paidAmount": session.amount,
@@ -116,7 +117,7 @@ const webhook = async (req, res) => {
     // ------------ Payment receipt
     if (event.type === 'charge.updated') {
         const session = event.data.object;
-        
+
        // ------- Save to DB
         await orderSchema.findOneAndUpdate(
             session.metadata.orderId,
