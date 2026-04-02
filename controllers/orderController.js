@@ -97,7 +97,11 @@ const webhook = async (req, res) => {
         return;
     }
 
-
+    // --------- Receipt url 
+    let receiptUrl;
+    if (event.type === 'charge.updated') {
+        receiptUrl = event.data.previous_attributes.receipt_url
+    }
     // Handle the event
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object
@@ -106,7 +110,10 @@ const webhook = async (req, res) => {
         await orderSchema.findByIdAndUpdate(session.metadata.orderId, {
             "payment.paymentId": session.id,
             "payment.status": "paid",
-            "payment.receipt": "",
+            "payment.fullname": session.customer_details.name,
+            "payment.email": session.customer_details.email,
+            "payment.receipt": receiptUrl,
+            "payment.paidAmount": session.amount,
             "payment.paidAt": Date.now()
         })
     }

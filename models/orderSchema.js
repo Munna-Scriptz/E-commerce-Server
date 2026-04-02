@@ -51,6 +51,9 @@ const paymentSchema = mongoose.Schema({
     receipt: {
         type: String
     },
+    paidAmount: {
+        type: Number
+    },
     paidAt: {
         type: Date
     },
