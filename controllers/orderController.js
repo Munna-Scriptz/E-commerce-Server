@@ -101,7 +101,7 @@ const webhook = async (req, res) => {
     // -------- payment information
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object
-        
+
         // ------- Save to DB
         await orderSchema.findByIdAndUpdate(session.metadata.orderId, {
             "payment.paymentId": session.id,

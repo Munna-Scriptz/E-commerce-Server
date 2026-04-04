@@ -98,6 +98,7 @@ const getAll = async (req, res) => {
     try {
         // --------- query
         const categorySlug = req.query.category
+        const search = req.query.search || ""
         const limit = parseInt(req.query.limit) || 10
         const page = parseInt(req.query.page) || 1
         const skip = (page - 1) * limit
@@ -117,6 +118,7 @@ const getAll = async (req, res) => {
                 }
             },
             { $match: { "isActive": true, ...(categorySlug && { "category.slug": categorySlug }) } },
+            { $match: { title: { $regex: search, $options: "i" } } },
             { $unwind: "$category" },
             { $sort: { createdAt: -1 } },
             { $skip: skip },
