@@ -3,7 +3,7 @@ const { cloudUpload } = require("../services/cloudUpload")
 const resHandler = require("../utils/resHandler")
 
 // ================= Create Category =====================
-const createCategory = async (req, res) => { 
+const createCategory = async (req, res) => {
     try {
         const { slug, name, description } = req.body
         const thumbnail = req.file
@@ -39,14 +39,24 @@ const createCategory = async (req, res) => {
 // ================= Get All Category =====================
 const getCategories = async (req, res) => {
     try {
-        const categories = await categorySchema.find({})
-        if (!categories) return resHandler.error(res, 404, "Categories not found")
+        const categories = await categorySchema.aggregate([{
+            $lookup: {
+                from: "products",
+                localField: "_id",
+                foreignField: "category",
+                as: "products"
+            }
+        },
+        { $set: { totalProducts: { $size: "$products" } } },
+        { $project: { products: 0, __v: 0 } }
+        ]);
 
-        // ----------- Send to client 
-        resHandler.success(res, 200, "", categories)
+        if (!categories.length) return resHandler.error(res, 404, "Categories not found");
+
+        resHandler.success(res, 200, "", categories);
     } catch (error) {
-        resHandler.error(res, 500, "Internal server error")
+        resHandler.error(res, 500, "Internal server error");
     }
-}
+};
 
 module.exports = { createCategory, getCategories }

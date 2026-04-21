@@ -10,15 +10,16 @@ const { cloudUpload, cloudDelete } = require("../services/cloudUpload")
 // ========================== Sign Up ===========================
 const signUp = async (req, res) => {
     try {
-        const { email, password } = req.body
+        const { email, fullname, phone, password } = req.body
 
         if (!email) return res.status(400).send({ message: 'Email is required!' })
-        if (!password) return res.status(400).send({ message: 'Password is required!' })
-        if (!isValidEmail(email)) return res.status(400).send({ message: 'Email is not valid!' })
         // ---------- Existing User 
         const existingUser = await userSchema.findOne({ email })
         if (existingUser) return res.status(400).send({ message: 'User with this email already exists. Please login!' })
-
+        if (!fullname) return res.status(400).send({ message: 'fullname is required!' })
+        if (!phone) return res.status(400).send({ message: 'phone number is required!' })
+        if (!password) return res.status(400).send({ message: 'Password is required!' })
+        if (!isValidEmail(email)) return res.status(400).send({ message: 'Email is not valid!' })
         // ------------- Send Email 
         const OTP = generateOTP()
         sendEmail({ email, subject: "Email Verification", item: OTP, template: verifyOtpTemp })
@@ -26,6 +27,8 @@ const signUp = async (req, res) => {
         // ----------- Sent to DB 
         const user = new userSchema({
             email,
+            fullname,
+            phone,
             password,
             otp: OTP,
             otpExpires: Date.now() + 5 * 60 * 1000
@@ -36,11 +39,25 @@ const signUp = async (req, res) => {
 
         // ------------------ Success 
         res.status(201).send('Registration Successful')
-
     } catch (error) {
         res.status(500).send({ message: "Internal server error" })
     }
 }
+
+const checkEmail = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) return res.status(400).send({ message: "Email is required!", })
+        const existingUser = await userSchema.findOne({ email });
+        if (existingUser) return res.status(409).send({ message: "User with this email already exists. Please login!", });
+
+        // ------- Available 
+        return res.status(200).send({ message: "Email is available", });
+    } catch (error) {
+        res.status(500).send({ message: "Internal server error" })
+    }
+};
 
 // ========================== Verify OTP =========================
 const verifyOTP = async (req, res) => {
@@ -262,4 +279,4 @@ const refreshAccToken = (req, res) => {
 
 
 
-module.exports = { signUp, verifyOTP, resendOTP, signIn, forgetPassword, resetPassword, getProfile, updateProfile, refreshAccToken }
+module.exports = { signUp, checkEmail, verifyOTP, resendOTP, signIn, forgetPassword, resetPassword, getProfile, updateProfile, refreshAccToken }

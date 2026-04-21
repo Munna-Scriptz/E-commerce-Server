@@ -17,6 +17,10 @@ const categorySchema = new mongoose.Schema({
     thumbnail: {
         type: String,
     },
+    totalProducts: {
+        type: Number,
+        default: 0
+    },
     isActive: {
         type: Boolean,
         default: true

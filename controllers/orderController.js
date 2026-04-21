@@ -5,6 +5,8 @@ const { ObjectId } = require('mongodb');
 const stripe = require('stripe')(process.env.STRIPE_SEC_KEY);
 const endpointSecret = process.env.STRIPE_SIGNING_SEC;
 
+
+// ================= Create checkout =====================
 const checkout = async (req, res) => {
     try {
         const user = req.user._id
@@ -86,6 +88,7 @@ const checkout = async (req, res) => {
     }
 }
 
+// ================= Checkout webhook =====================
 const webhook = async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
