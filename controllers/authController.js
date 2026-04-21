@@ -38,7 +38,7 @@ const signUp = async (req, res) => {
 
 
         // ------------------ Success 
-        res.status(201).send('Registration Successful')
+        res.status(201).send({ message: 'Registration Successful' })
     } catch (error) {
         res.status(500).send({ message: "Internal server error" })
     }
@@ -98,29 +98,37 @@ const resendOTP = async (req, res) => {
     try {
         const { email } = req.body;
 
-        if (!email) return res.status(400).send({ message: "Invalid or Incorrect Email" })
-        // --------- Find From DB 
-        const user = await userSchema.findOne({
+        if (!email) return res.status(400).send({ message: "Email is required" });
+
+        const user = await userSchema.findOne({ email });
+
+        if (!user) return res.status(404).send({ message: "User not found" });
+        if (user.isVerified) return res.status(400).send({ message: "Your account is already verified. Please login.", });
+
+        if (user.otpExpires < new Date()) return res.status(400).send({ message: "OTP expired. Please sign up again or request new verification.", });
+
+        const OTP = generateOTP();
+        user.otp = OTP;
+        user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+
+
+        await user.save();
+
+        await sendEmail({
             email,
-            isVerified: false,
-            otpExpires: { gt: new Date() }
-        })
-        // ------ Validations 
-        if (!user) return res.status(400).send({ message: "User with this email does't exist" })
+            subject: "Email Verification",
+            item: OTP,
+            template: verifyOtpTemp,
+        });
 
-        // ------- Re-generate otp and expiryTime and send it to db 
-        const OTP = generateOTP()
-        user.otp = OTP
-        user.otpExpires = Date.now() + 5 * 60 * 1000
-        user.save()
-        sendEmail({ email, subject: "Email Verification", item: OTP, template: verifyOtpTemp })
-
-        // -------------- Success 
-        res.status(201).send({ message: "New OTP has been sent!" })
+        // -------- Success 
+        res.status(200).send({message: "New OTP has been sent!",});
     } catch (error) {
-        res.status(500).send({ message: "Internal server error" })
+        return res.status(500).send({
+            message: "Internal server error",
+        });
     }
-}
+};
 
 // ========================== Sign In =============================
 const signIn = async (req, res) => {
