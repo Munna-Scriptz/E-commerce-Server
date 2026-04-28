@@ -27,6 +27,11 @@ const productSchema = new mongoose.Schema({
         min: 0,
         max: 100,
     },
+    price: {
+        type: Number,
+        min: 0,
+        required: true
+    },
     variants: [
         {
             sku: {

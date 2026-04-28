@@ -4,7 +4,7 @@ const authMiddleware = (req, res, next) => {
     try {
         const token = req.cookies
         // --------- Validations 
-        if (!token["X-AS-TOKEN"]) return res.status(400).send({ message: 'Invalid request' })
+        if (!token["X-AS-TOKEN"]) return res.status(401).send({ message: 'Invalid request' })
 
         // ------- verify 
         const decoded = verifyToken(token["X-AS-TOKEN"])

@@ -11,12 +11,15 @@ const { webhook } = require('./controllers/orderController');
 const app = express()
 
 // ------------------- Middlewares 
-app.post('/webhook', express.raw({type: 'application/json'}), webhook);
+app.post('/webhook', express.raw({ type: 'application/json' }), webhook);
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+}))
 // ------------------- Route 
 app.use(router)
 // ------------------- Database 

@@ -7,12 +7,16 @@ const resHandler = require("../utils/resHandler")
 // =============== Create Product ==================
 const createProduct = async (req, res) => {
     try {
-        const { title, slug, description, category, price, discountPercentage, variants, specifications, brand, badge, warranty, shipping, tags, isActive } = req.body
+        const { title, slug, description, category, price, discountPercentage, brand, badge, warranty, shipping, isActive } = req.body
+        const variants = JSON.parse(req.body.variants);
+        const specifications = JSON.parse(req.body.specifications);
+        const tags = JSON.parse(req.body.tags);
         const thumbnail = req.files?.thumbnail?.[0]
         const images = req.files?.images
 
         // ---------- Validation ----------
         if (!title) return resHandler.error(res, 400, 'Title is required')
+        if (!price) return resHandler.error(res, 400, 'price is required')
         // Slug 
         if (!slug) return resHandler.error(res, 400, 'Slug is required')
         const existSlug = await productSchema.findOne({ slug: slug.toLowerCase() })
@@ -37,6 +41,7 @@ const createProduct = async (req, res) => {
         if (new Set(AllSku).size !== AllSku.length) return resHandler.error(res, 400, 'SKU with this name already exists')
 
         // Specifications
+        if (!specifications) return resHandler.error(res, 400, 'Specification is required')
         if (!specifications.display.size) return resHandler.error(res, 400, 'Specification display size required')
         if (!specifications.display.type) return resHandler.error(res, 400, 'Specification display type required')
         if (!specifications.display.resolution) return resHandler.error(res, 400, 'Specification display resolution required')
@@ -52,8 +57,8 @@ const createProduct = async (req, res) => {
 
 
         // ---------- Upload images ----------
-        // if (!thumbnail) return resHandler.error(res, 400, 'Product thumbnail is required')
-        // const thumbRes = await cloudUpload({ file: thumbnail, folderPath: "rexify/products", folder: "product" })
+        if (!thumbnail) return resHandler.error(res, 400, 'Product thumbnail is required')
+        const thumbRes = await cloudUpload({ file: thumbnail, folderPath: "rexify/products", folder: "product" })
 
         const imageUrls = []
         if (images) {
@@ -67,7 +72,7 @@ const createProduct = async (req, res) => {
         // ---------- Save to DB ----------
         const product = productSchema({
             title,
-            slug: slug.toLowerCase(),
+            slug,
             description,
             category,
             price,
@@ -75,7 +80,7 @@ const createProduct = async (req, res) => {
             variants,
             specifications,
             images: imageUrls,
-            // thumbnail: thumbRes.secure_url,
+            thumbnail: thumbRes.secure_url,
             brand,
             badge,
             warranty,
